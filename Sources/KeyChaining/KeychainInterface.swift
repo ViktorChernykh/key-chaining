@@ -9,7 +9,7 @@ import Foundation
 import Security
 
 /// CRUD for work with keychain.
-public struct KeychainInterface {
+public struct KeychainInterface: KeychainProtocol {
 	let passwordQuery: PasswordProtocol
 
 	public init(passwordQuery: PasswordProtocol) {
