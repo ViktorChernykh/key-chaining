@@ -42,7 +42,6 @@ extension InternetPassword: PasswordProtocol {
 		query[String(kSecClass)] = kSecClassInternetPassword
 		query[String(kSecAttrAccessGroup)] = accessGroup
 		query[String(kSecAttrServer)] = server
-		query[String(kSecAttrServer)] = server
 		query[String(kSecAttrPort)] = port
 		query[String(kSecAttrPath)] = path
 		query[String(kSecAttrSecurityDomain)] = securityDomain
