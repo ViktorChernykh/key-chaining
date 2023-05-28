@@ -17,7 +17,7 @@ public struct InternetPassword {
 	let internetProtocol: InternetProtocol?
 	let internetAuthenticationType: InternetAuthenticationType?
 
-	init(
+	public init(
 		accessGroup: String? = nil,
 		server: String,
 		port: Int? = nil,

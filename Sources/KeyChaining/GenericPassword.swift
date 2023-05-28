@@ -12,7 +12,7 @@ public struct GenericPassword {
 	let accessGroup: String?
 	let service: String
 
-	init(accessGroup: String? = nil, service: String) {
+	public init(accessGroup: String? = nil, service: String) {
 		self.accessGroup = accessGroup
 		self.service = service
 	}
