@@ -19,16 +19,16 @@ public struct KeychainInterface: KeychainProtocol {
 	/// Add / Update password to Keychain.
 	///
 	/// - Parameters:
-	///   - password: User's password.
-	///   - account: Account name.
+	///   - value: Secret data for storage.
+	///   - key: Account name or key for stored data.
 	/// - Throws: If the status is not `errSecSuccess`
-	public func setPassword(_ password: String, for account: String) throws {
-		guard let encodedPassword = password.data(using: .utf8) else {
+	public func setValue(_ value: String, for key: String) throws {
+		guard let encodedPassword = value.data(using: .utf8) else {
 			throw KeychainError.string2DataConversionError
 		}
 
 		var query = passwordQuery.query
-		query[String(kSecAttrAccount)] = account
+		query[String(kSecAttrAccount)] = key
 
 		// The status indicates whether the data was found successfully or failed.
 		var status = SecItemCopyMatching(query as CFDictionary, nil)
@@ -60,15 +60,15 @@ public struct KeychainInterface: KeychainProtocol {
 
 	/// Read password from Keychain.
 	///
-	/// - Parameter account: Account name.
+	/// - Parameter key: Account name or key for stored data.
 	/// - Throws: If the status is `errSecItemNotFound` or not `errSecSuccess` or the found Data is not a String.
 	/// - Returns: Founded password.
-	public func getPassword(for account: String) throws -> String? {
+	public func getValue(for key: String) throws -> String? {
 		var query = passwordQuery.query
 		query[String(kSecMatchLimit)] = kSecMatchLimitOne
 		query[String(kSecReturnAttributes)] = kCFBooleanTrue
 		query[String(kSecReturnData)] = kCFBooleanTrue
-		query[String(kSecAttrAccount)] = account
+		query[String(kSecAttrAccount)] = key
 
 		// The status indicates if the operation succeeded or failed.
 		var queryResult: AnyObject?
@@ -95,11 +95,11 @@ public struct KeychainInterface: KeychainProtocol {
 
 	/// Delete password from Keychain.
 	///
-	/// - Parameter account: Account name.
+	/// - Parameter key: Account name or key for stored data.
 	/// - Throws: If the status is not `errSecSuccess` or not `errSecItemNotFound`
-	public func removePassword(for account: String) throws {
+	public func removeValue(for key: String) throws {
 		var query = passwordQuery.query
-		query[String(kSecAttrAccount)] = account
+		query[String(kSecAttrAccount)] = key
 
 		// The status indicates if the operation succeeded or failed.
 		let status = SecItemDelete(query as CFDictionary)
@@ -111,7 +111,7 @@ public struct KeychainInterface: KeychainProtocol {
 	@discardableResult
 	/// Delete all passwords from Keychain.
 	/// - Throws: If the status is not `errSecSuccess` or not `errSecItemNotFound`
-	public func removeAllPasswords() throws -> Int {
+	public func removeAllValues() throws -> Int {
 		let query = passwordQuery.query
 		var count = 0
 

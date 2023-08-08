@@ -6,8 +6,8 @@
 //
 
 public protocol KeychainProtocol {
-	func setPassword(_ password: String, for account: String) throws
-	func getPassword(for account: String) throws -> String?
-	func removePassword(for account: String) throws
-	func removeAllPasswords() throws -> Int
+	func setValue(_ value: String, for key: String) throws
+	func getValue(for key: String) throws -> String?
+	func removeValue(for key: String) throws
+	func removeAllValues() throws -> Int
 }
