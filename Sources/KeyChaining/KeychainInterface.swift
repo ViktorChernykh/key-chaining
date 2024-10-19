@@ -99,6 +99,7 @@ public struct KeychainInterface: KeychainProtocol {
 	/// - Throws: If the status is not `errSecSuccess` or not `errSecItemNotFound`
 	public func removeValue(for key: String) throws {
 		var query = passwordQuery.query
+		query[String(kSecMatchLimit)] = kSecMatchLimitOne
 		query[String(kSecAttrAccount)] = key
 
 		// The status indicates if the operation succeeded or failed.

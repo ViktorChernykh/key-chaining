@@ -44,12 +44,15 @@ final class KeyChainingTests: XCTestCase {
 		do {
 			// Given
 			try genericPasswordKeychain.setValue("pwd_1234", for: "genericAccount")
+			try genericPasswordKeychain.setValue("pwd_1235", for: "genericAccount2")
 
 			// When
 			let password = try genericPasswordKeychain.getValue(for: "genericAccount")
+			let password2 = try genericPasswordKeychain.getValue(for: "genericAccount2")
 
 			// Then
 			XCTAssertEqual("pwd_1234", password)
+			XCTAssertEqual("pwd_1235", password2)
 		} catch (let error) {
 			XCTFail("Reading generic password failed with \(error.localizedDescription)")
 		}
@@ -58,14 +61,17 @@ final class KeyChainingTests: XCTestCase {
 	func testUpdateGenericPassword() {
 		do {
 			// Given
+			try genericPasswordKeychain.setValue("pwd_123", for: "genericAccount2")
 			try genericPasswordKeychain.setValue("pwd_1234", for: "genericAccount")
 			try genericPasswordKeychain.setValue("pwd_1235", for: "genericAccount")
 
 			// When
 			let password = try genericPasswordKeychain.getValue(for: "genericAccount")
+			let password2 = try genericPasswordKeychain.getValue(for: "genericAccount2")
 
 			// Then
 			XCTAssertEqual("pwd_1235", password)
+			XCTAssertEqual("pwd_123", password2)
 		} catch (let error) {
 			XCTFail("Updating generic password failed with \(error.localizedDescription)")
 		}
@@ -75,12 +81,16 @@ final class KeyChainingTests: XCTestCase {
 		do {
 			// Given
 			try genericPasswordKeychain.setValue("pwd_1234", for: "genericAccount")
+			try genericPasswordKeychain.setValue("pwd_123", for: "genericAccount2")
 
 			// When
 			try genericPasswordKeychain.removeValue(for: "genericAccount")
+			let password = try genericPasswordKeychain.getValue(for: "genericAccount")
+			let password2 = try genericPasswordKeychain.getValue(for: "genericAccount2")
 
 			// Then
-			XCTAssertNil(try genericPasswordKeychain.getValue(for: "genericAccount"))
+			XCTAssertNil(password)
+			XCTAssertEqual("pwd_123", password2)
 		} catch (let error) {
 			XCTFail("Saving generic password failed with \(error.localizedDescription)")
 		}
