@@ -37,21 +37,21 @@ public enum InternetAuthenticationType: RawRepresentable {
 	public var rawValue: String {
 		switch self {
 		case .ntlm:
-			return String(kSecAttrAuthenticationTypeNTLM)
+			 String(kSecAttrAuthenticationTypeNTLM)
 		case .msn:
-			return String(kSecAttrAuthenticationTypeMSN)
+			String(kSecAttrAuthenticationTypeMSN)
 		case .dpa:
-			return String(kSecAttrAuthenticationTypeDPA)
+			String(kSecAttrAuthenticationTypeDPA)
 		case .rpa:
-			return String(kSecAttrAuthenticationTypeRPA)
+			String(kSecAttrAuthenticationTypeRPA)
 		case .httpBasic:
-			return String(kSecAttrAuthenticationTypeHTTPBasic)
+			String(kSecAttrAuthenticationTypeHTTPBasic)
 		case .httpDigest:
-			return String(kSecAttrAuthenticationTypeHTTPDigest)
+			String(kSecAttrAuthenticationTypeHTTPDigest)
 		case .htmlForm:
-			return String(kSecAttrAuthenticationTypeHTMLForm)
+			String(kSecAttrAuthenticationTypeHTMLForm)
 		case .default:
-			return String(kSecAttrAuthenticationTypeDefault)
+			String(kSecAttrAuthenticationTypeDefault)
 		}
 	}
 }

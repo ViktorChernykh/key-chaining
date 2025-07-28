@@ -83,67 +83,67 @@ public enum InternetProtocol: RawRepresentable {
 	public var rawValue: String {
 		switch self {
 		case .ftp:
-			return String(kSecAttrProtocolFTP)
+			String(kSecAttrProtocolFTP)
 		case .ftpAccount:
-			return String(kSecAttrProtocolFTPAccount)
+			String(kSecAttrProtocolFTPAccount)
 		case .http:
-			return String(kSecAttrProtocolHTTP)
+			String(kSecAttrProtocolHTTP)
 		case .irc:
-			return String(kSecAttrProtocolIRC)
+			String(kSecAttrProtocolIRC)
 		case .nntp:
-			return String(kSecAttrProtocolNNTP)
+			String(kSecAttrProtocolNNTP)
 		case .pop3:
-			return String(kSecAttrProtocolPOP3)
+			String(kSecAttrProtocolPOP3)
 		case .smtp:
-			return String(kSecAttrProtocolSMTP)
+			String(kSecAttrProtocolSMTP)
 		case .socks:
-			return String(kSecAttrProtocolSOCKS)
+			String(kSecAttrProtocolSOCKS)
 		case .imap:
-			return String(kSecAttrProtocolIMAP)
+			String(kSecAttrProtocolIMAP)
 		case .ldap:
-			return String(kSecAttrProtocolLDAP)
+			String(kSecAttrProtocolLDAP)
 		case .appleTalk:
-			return String(kSecAttrProtocolAppleTalk)
+			String(kSecAttrProtocolAppleTalk)
 		case .afp:
-			return String(kSecAttrProtocolAFP)
+			String(kSecAttrProtocolAFP)
 		case .telnet:
-			return String(kSecAttrProtocolTelnet)
+			String(kSecAttrProtocolTelnet)
 		case .ssh:
-			return String(kSecAttrProtocolSSH)
+			String(kSecAttrProtocolSSH)
 		case .ftps:
-			return String(kSecAttrProtocolFTPS)
+			String(kSecAttrProtocolFTPS)
 		case .https:
-			return String(kSecAttrProtocolHTTPS)
+			String(kSecAttrProtocolHTTPS)
 		case .httpProxy:
-			return String(kSecAttrProtocolHTTPProxy)
+			String(kSecAttrProtocolHTTPProxy)
 		case .httpsProxy:
-			return String(kSecAttrProtocolHTTPSProxy)
+			String(kSecAttrProtocolHTTPSProxy)
 		case .ftpProxy:
-			return String(kSecAttrProtocolFTPProxy)
+			String(kSecAttrProtocolFTPProxy)
 		case .smb:
-			return String(kSecAttrProtocolSMB)
+			String(kSecAttrProtocolSMB)
 		case .rtsp:
-			return String(kSecAttrProtocolRTSP)
+			String(kSecAttrProtocolRTSP)
 		case .rtspProxy:
-			return String(kSecAttrProtocolRTSPProxy)
+			String(kSecAttrProtocolRTSPProxy)
 		case .daap:
-			return String(kSecAttrProtocolDAAP)
+			String(kSecAttrProtocolDAAP)
 		case .eppc:
-			return String(kSecAttrProtocolEPPC)
+			String(kSecAttrProtocolEPPC)
 		case .ipp:
-			return String(kSecAttrProtocolIPP)
+			String(kSecAttrProtocolIPP)
 		case .nntps:
-			return String(kSecAttrProtocolNNTPS)
+			String(kSecAttrProtocolNNTPS)
 		case .ldaps:
-			return String(kSecAttrProtocolLDAPS)
+			String(kSecAttrProtocolLDAPS)
 		case .telnetS:
-			return String(kSecAttrProtocolTelnetS)
+			String(kSecAttrProtocolTelnetS)
 		case .imaps:
-			return String(kSecAttrProtocolIMAPS)
+			String(kSecAttrProtocolIMAPS)
 		case .ircs:
-			return String(kSecAttrProtocolIRCS)
+			String(kSecAttrProtocolIRCS)
 		case .pop3S:
-			return String(kSecAttrProtocolPOP3S)
+			String(kSecAttrProtocolPOP3S)
 		}
 	}
 }
