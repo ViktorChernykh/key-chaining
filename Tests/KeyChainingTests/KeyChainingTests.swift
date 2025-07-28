@@ -8,20 +8,21 @@ final class KeyChainingTests: XCTestCase {
 	override func setUp() {
 		super.setUp()
 
-		let genericPasswordQuery = GenericPassword(
+		let genericPasswordQuery: GenericPassword = .init(
 			accessGroup: "someGroup",
-			service: "MyService")
+			service: "MyService"
+		)
 		genericPasswordKeychain = KeychainInterface(passwordQuery: genericPasswordQuery)
 
-		let internetPasswordQuery = InternetPassword(
+		let internetPasswordQuery: InternetPassword = .init(
 			accessGroup: "someGroup",
 			server: "someServer",
 			port: 8080,
 			path: "somePath",
 			securityDomain: "someDomain",
 			internetProtocol: .https,
-			internetAuthenticationType: .httpBasic)
-
+			internetAuthenticationType: .httpBasic
+		)
 		internetPasswordKeychain = KeychainInterface(passwordQuery: internetPasswordQuery)
 	}
 
@@ -32,158 +33,118 @@ final class KeyChainingTests: XCTestCase {
 		super.tearDown()
 	}
 
-	func testSaveGenericPassword() {
-		do {
-			try genericPasswordKeychain.setValue("pwd_1234", for: "genericAccount")
-		} catch (let error) {
-			XCTFail("Saving generic password failed with \(error.localizedDescription)")
-		}
+	func testSaveGenericPassword() throws {
+		try genericPasswordKeychain.setValue("pwd_1234", for: "genericAccount")
 	}
 
-	func testReadGenericPassword() {
-		do {
-			// Given
-			try genericPasswordKeychain.setValue("pwd_1234", for: "genericAccount")
-			try genericPasswordKeychain.setValue("pwd_1235", for: "genericAccount2")
+	func testReadGenericPassword() throws {
+		// Given
+		try genericPasswordKeychain.setValue("pwd_1234", for: "genericAccount")
+		try genericPasswordKeychain.setValue("pwd_1235", for: "genericAccount2")
 
-			// When
-			let password = try genericPasswordKeychain.getValue(for: "genericAccount")
-			let password2 = try genericPasswordKeychain.getValue(for: "genericAccount2")
+		// When
+		let password: String? = try genericPasswordKeychain.getValue(for: "genericAccount")
+		let password2: String? = try genericPasswordKeychain.getValue(for: "genericAccount2")
 
-			// Then
-			XCTAssertEqual("pwd_1234", password)
-			XCTAssertEqual("pwd_1235", password2)
-		} catch (let error) {
-			XCTFail("Reading generic password failed with \(error.localizedDescription)")
-		}
+		// Then
+		XCTAssertEqual("pwd_1234", password)
+		XCTAssertEqual("pwd_1235", password2)
 	}
 
-	func testUpdateGenericPassword() {
-		do {
-			// Given
-			try genericPasswordKeychain.setValue("pwd_123", for: "genericAccount2")
-			try genericPasswordKeychain.setValue("pwd_1234", for: "genericAccount")
-			try genericPasswordKeychain.setValue("pwd_1235", for: "genericAccount")
+	func testUpdateGenericPassword() throws {
+		// Given
+		try genericPasswordKeychain.setValue("pwd_123", for: "genericAccount2")
+		try genericPasswordKeychain.setValue("pwd_1234", for: "genericAccount")
+		try genericPasswordKeychain.setValue("pwd_1235", for: "genericAccount")
 
-			// When
-			let password = try genericPasswordKeychain.getValue(for: "genericAccount")
-			let password2 = try genericPasswordKeychain.getValue(for: "genericAccount2")
+		// When
+		let password: String? = try genericPasswordKeychain.getValue(for: "genericAccount")
+		let password2: String? = try genericPasswordKeychain.getValue(for: "genericAccount2")
 
-			// Then
-			XCTAssertEqual("pwd_1235", password)
-			XCTAssertEqual("pwd_123", password2)
-		} catch (let error) {
-			XCTFail("Updating generic password failed with \(error.localizedDescription)")
-		}
+		// Then
+		XCTAssertEqual("pwd_1235", password)
+		XCTAssertEqual("pwd_123", password2)
 	}
 
-	func testRemoveGenericPassword() {
-		do {
-			// Given
-			try genericPasswordKeychain.setValue("pwd_1234", for: "genericAccount")
-			try genericPasswordKeychain.setValue("pwd_123", for: "genericAccount2")
+	func testRemoveGenericPassword() throws {
+		// Given
+		try genericPasswordKeychain.setValue("pwd_1234", for: "genericAccount")
+		try genericPasswordKeychain.setValue("pwd_123", for: "genericAccount2")
 
-			// When
-			try genericPasswordKeychain.removeValue(for: "genericAccount")
-			let password = try genericPasswordKeychain.getValue(for: "genericAccount")
-			let password2 = try genericPasswordKeychain.getValue(for: "genericAccount2")
+		// When
+		try genericPasswordKeychain.removeValue(for: "genericAccount")
+		let password: String? = try genericPasswordKeychain.getValue(for: "genericAccount")
+		let password2: String? = try genericPasswordKeychain.getValue(for: "genericAccount2")
 
-			// Then
-			XCTAssertNil(password)
-			XCTAssertEqual("pwd_123", password2)
-		} catch (let error) {
-			XCTFail("Saving generic password failed with \(error.localizedDescription)")
-		}
+		// Then
+		XCTAssertNil(password)
+		XCTAssertEqual("pwd_123", password2)
 	}
 
-	func testRemoveAllGenericPasswords() {
-		do {
-			// Given
-			try genericPasswordKeychain.setValue("pwd_1234", for: "genericAccount")
-			try genericPasswordKeychain.setValue("pwd_1235", for: "genericAccount2")
+	func testRemoveAllGenericPasswords() throws {
+		// Given
+		try genericPasswordKeychain.setValue("pwd_1234", for: "genericAccount")
+		try genericPasswordKeychain.setValue("pwd_1235", for: "genericAccount2")
 
-			// When
-			let deletedCount = try genericPasswordKeychain.removeAllValues()
+		// When
+		let deletedCount: Int = try genericPasswordKeychain.removeAllValues()
 
-			// Then
-			XCTAssertEqual(deletedCount, 2)
-			XCTAssertNil(try genericPasswordKeychain.getValue(for: "genericAccount"))
-			XCTAssertNil(try genericPasswordKeychain.getValue(for: "genericAccount2"))
-		} catch (let error) {
-			XCTFail("Removing generic passwords failed with \(error.localizedDescription)")
-		}
+		// Then
+		XCTAssertEqual(deletedCount, 2)
+		XCTAssertNil(try genericPasswordKeychain.getValue(for: "genericAccount"))
+		XCTAssertNil(try genericPasswordKeychain.getValue(for: "genericAccount2"))
 	}
 
-	func testSaveInternetPassword() {
-		do {
-			// Given
-			try internetPasswordKeychain.setValue("pwd_1234", for: "internetAccount")
-		} catch (let error) {
-			XCTFail("Saving Internet password failed with \(error.localizedDescription)")
-		}
+	func testSaveInternetPassword() throws {
+		// Given
+		try internetPasswordKeychain.setValue("pwd_1234", for: "internetAccount")
 	}
 
-	func testReadInternetPassword() {
-		do {
-			// Given
-			try internetPasswordKeychain.setValue("pwd_1234", for: "internetAccount")
+	func testReadInternetPassword() throws {
+		// Given
+		try internetPasswordKeychain.setValue("pwd_1234", for: "internetAccount")
 
-			// When
-			let password = try internetPasswordKeychain.getValue(for: "internetAccount")
+		// When
+		let password: String? = try internetPasswordKeychain.getValue(for: "internetAccount")
 
-			// Then
-			XCTAssertEqual("pwd_1234", password)
-		} catch (let error) {
-			XCTFail("Reading Internet password failed with \(error.localizedDescription)")
-		}
+		// Then
+		XCTAssertEqual("pwd_1234", password)
 	}
 
-	func testUpdateInternetPassword() {
-		do {
-			// Given
-			try internetPasswordKeychain.setValue("pwd_1234", for: "internetAccount")
-			try internetPasswordKeychain.setValue("pwd_1235", for: "internetAccount")
+	func testUpdateInternetPassword() throws {
+		// Given
+		try internetPasswordKeychain.setValue("pwd_1234", for: "internetAccount")
+		try internetPasswordKeychain.setValue("pwd_1235", for: "internetAccount")
 
-			// When
-			let password = try internetPasswordKeychain.getValue(for: "internetAccount")
+		// When
+		let password: String? = try internetPasswordKeychain.getValue(for: "internetAccount")
 
-			// Then
-			XCTAssertEqual("pwd_1235", password)
-		} catch (let error) {
-			XCTFail("Updating Internet password failed with \(error.localizedDescription)")
-		}
+		// Then
+		XCTAssertEqual("pwd_1235", password)
 	}
 
-	func testRemoveInternetPassword() {
-		do {
-			// Given
-			try internetPasswordKeychain.setValue("pwd_1234", for: "internetAccount")
+	func testRemoveInternetPassword() throws {
+		// Given
+		try internetPasswordKeychain.setValue("pwd_1234", for: "internetAccount")
 
-			// When
-			try internetPasswordKeychain.removeValue(for: "internetAccount")
+		// When
+		try internetPasswordKeychain.removeValue(for: "internetAccount")
 
-			// Then
-			XCTAssertNil(try internetPasswordKeychain.getValue(for: "internetAccount"))
-		} catch (let error) {
-			XCTFail("Removing Internet password failed with \(error.localizedDescription)")
-		}
+		// Then
+		XCTAssertNil(try internetPasswordKeychain.getValue(for: "internetAccount"))
 	}
 
-	func testRemoveAllInternetPasswords() {
-		do {
-			// Given
-			try internetPasswordKeychain.setValue("pwd_1234", for: "internetAccount")
-			try internetPasswordKeychain.setValue("pwd_1235", for: "internetAccount2")
+	func testRemoveAllInternetPasswords() throws {
+		// Given
+		try internetPasswordKeychain.setValue("pwd_1234", for: "internetAccount")
+		try internetPasswordKeychain.setValue("pwd_1235", for: "internetAccount2")
 
-			// When
-			let deletedCount = try internetPasswordKeychain.removeAllValues()
+		// When
+		let deletedCount: Int = try internetPasswordKeychain.removeAllValues()
 
-			// Then
-			XCTAssertEqual(deletedCount, 2)
-			XCTAssertNil(try internetPasswordKeychain.getValue(for: "internetAccount"))
-			XCTAssertNil(try internetPasswordKeychain.getValue(for: "internetAccount2"))
-		} catch (let error) {
-			XCTFail("Removing Internet passwords failed with \(error.localizedDescription)")
-		}
+		// Then
+		XCTAssertEqual(deletedCount, 2)
+		XCTAssertNil(try internetPasswordKeychain.getValue(for: "internetAccount"))
+		XCTAssertNil(try internetPasswordKeychain.getValue(for: "internetAccount2"))
 	}
 }

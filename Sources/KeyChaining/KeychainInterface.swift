@@ -10,8 +10,9 @@ import Security
 
 /// CRUD for work with keychain.
 public struct KeychainInterface: KeychainProtocol {
-	let passwordQuery: PasswordProtocol
+	private let passwordQuery: any PasswordProtocol
 
+	// MARK: - Init
 	public init(passwordQuery: any PasswordProtocol) {
 		self.passwordQuery = passwordQuery
 	}
@@ -21,9 +22,9 @@ public struct KeychainInterface: KeychainProtocol {
 	/// - Parameters:
 	///   - value: Secret data for storage.
 	///   - key: Account name or key for stored data.
-	/// - Throws: If the status is not `errSecSuccess`
+	/// - Throws: If the status is not `errSecSuccess`.
 	public func setValue(_ value: String, for key: String) throws {
-		guard let encodedPassword = value.data(using: .utf8) else {
+		guard let encodedPassword: Data = value.data(using: .utf8) else {
 			throw KeychainError.string2DataConversionError
 		}
 
@@ -34,8 +35,7 @@ public struct KeychainInterface: KeychainProtocol {
 		var status: OSStatus = SecItemCopyMatching(query as CFDictionary, nil)
 		switch status {
 		case errSecSuccess:	// data exists
-			var attributesToUpdate: [String: Any] = [:]
-			attributesToUpdate[String(kSecValueData)] = encodedPassword
+			let attributesToUpdate: [String: Any] = [String(kSecValueData): encodedPassword]
 
 			// Override status
 			// Update the item identified by query, overriding the previous value
@@ -82,10 +82,14 @@ public struct KeychainInterface: KeychainProtocol {
 		case errSecSuccess:
 			guard
 				let queriedItem: [String: Any] = queryResult as? [String: Any],
-				let passwordData: Data = queriedItem[String(kSecValueData)] as? Data,
+				var passwordData: Data = queriedItem[String(kSecValueData)] as? Data,
 				let password: String = .init(data: passwordData, encoding: .utf8)
 			else {
 				throw KeychainError.data2StringConversionError
+			}
+			// Zeroize of passwordData
+			defer {
+				passwordData.resetBytes(in: 0..<passwordData.count)
 			}
 			return password
 		case errSecItemNotFound:
@@ -98,7 +102,7 @@ public struct KeychainInterface: KeychainProtocol {
 	/// Delete password from Keychain.
 	///
 	/// - Parameter key: Account name or key for stored data.
-	/// - Throws: If the status is not `errSecSuccess` or not `errSecItemNotFound`
+	/// - Throws: If the status is not `errSecSuccess` or not `errSecItemNotFound`.
 	public func removeValue(for key: String) throws {
 		var query: [String: Any] = passwordQuery.query
 		query[String(kSecMatchLimit)] = kSecMatchLimitOne
@@ -111,22 +115,24 @@ public struct KeychainInterface: KeychainProtocol {
 		}
 	}
 
-	@discardableResult
 	/// Delete all passwords from Keychain.
-	/// - Throws: If the status is not `errSecSuccess` or not `errSecItemNotFound`
+	///
+	/// - Returns: The value is `true` if the value is deleted, otherwise `false` is returned.
+	/// - Throws: If the status is not `errSecSuccess` or not `errSecItemNotFound`.
+	@discardableResult
 	public func removeAllValues() throws -> Int {
 		let query: [String: Any] = passwordQuery.query
 		var count: Int = 0
 
 		while true {
 			let status: OSStatus = SecItemDelete(query as CFDictionary)
-			if status == errSecItemNotFound {
+			if status == errSecSuccess {
+				count += 1
+			} else if status == errSecItemNotFound {
 				break
-			}
-			if status != errSecSuccess {
+			} else {
 				throw error(from: status)
 			}
-			count += 1
 		}
 		return count
 	}
@@ -134,7 +140,7 @@ public struct KeychainInterface: KeychainProtocol {
 	/// Return KeychainError with message.
 	///
 	/// - Parameter status: Keychain call completion status.
-	/// - Returns: KeychainError
+	/// - Returns: KeychainError.
 	private func error(from status: OSStatus) -> KeychainError {
 		let message: String = SecCopyErrorMessageString(status, nil)
 		as

@@ -8,7 +8,7 @@
 import Foundation
 import Security
 
-public enum InternetAuthenticationType: RawRepresentable {
+public enum InternetAuthenticationType: Sendable, RawRepresentable {
 	case ntlm, msn, dpa, rpa, httpBasic, httpDigest, htmlForm, `default`
 
 	public init?(rawValue: String) {
