@@ -1,4 +1,4 @@
-// swift-tools-version: 5.10
+// swift-tools-version: 6.0
 import PackageDescription
 
 let package = Package(
@@ -24,8 +24,6 @@ let package = Package(
 
 /// Swift compiler settings for Release configuration.
 var swiftSettings: [SwiftSetting] { [
-	// Enable maximum optimizations in release
-	.unsafeFlags(["-O"], .when(configuration: .release)),
 	// "ExistentialAny" is an option that makes the use of the `any` keyword for existential types `required`
 	.enableUpcomingFeature("ExistentialAny")
 ] }
