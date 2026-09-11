@@ -10,6 +10,9 @@ import Foundation
 public enum KeychainError: Error {
 	case string2DataConversionError
 	case data2StringConversionError
+
+	/// The system would not build the protection asked for.
+	case accessControlFailed(message: String)
 	case unhandledError(message: String)
 }
 
@@ -20,6 +23,8 @@ extension KeychainError: LocalizedError {
 			NSLocalizedString("String to Data conversion error", comment: "")
 		case .data2StringConversionError:
 			NSLocalizedString("Data to String conversion error", comment: "")
+		case .accessControlFailed(let message):
+			NSLocalizedString(message, comment: "")
 		case .unhandledError(let message):
 			NSLocalizedString(message, comment: "")
 		}

@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import LocalAuthentication
 import Security
 
 /// CRUD for work with keychain.
@@ -17,13 +18,18 @@ public struct KeychainInterface: KeychainProtocol {
 		self.passwordQuery = passwordQuery
 	}
 
-	/// Add / Update password to Keychain.
+	/// Set / Update password to Keychain.
 	///
 	/// - Parameters:
 	///   - value: Secret data for storage.
 	///   - key: Account name or key for stored data.
+	///   - protection: How well the secret is guarded. See ``KeychainProtection``.
 	/// - Throws: If the status is not `errSecSuccess`.
-	public func setValue(_ value: String, for key: String) throws {
+	public func setValue(
+		_ value: String,
+		for key: String,
+		protection: KeychainProtection = .thisDeviceOnly
+	) throws {
 		guard let encodedPassword: Data = value.data(using: .utf8) else {
 			throw KeychainError.string2DataConversionError
 		}
@@ -31,11 +37,35 @@ public struct KeychainInterface: KeychainProtocol {
 		var query: [String: Any] = passwordQuery.query
 		query[String(kSecAttrAccount)] = key
 
+		let attributes: [String: Any] = try protection.attributes()
+
+		// Presence is asked for at the moment of reading, so the item has to be made carrying it:
+		// an item written without one cannot be given an access control afterwards. Writing over
+		// a secret is not a reason to make the person prove anything, and deleting first does not
+		// ask them to.
+		if case .userPresence = protection {
+			try removeValue(for: key)
+
+			var insert: [String: Any] = query
+			insert[String(kSecValueData)] = encodedPassword
+			insert.merge(attributes) { _, new in new }
+
+			let status: OSStatus = SecItemAdd(insert as CFDictionary, nil)
+			if status != errSecSuccess {
+				throw error(from: status)
+			}
+
+			return
+		}
+
 		// The status indicates whether the data was found successfully or failed.
 		var status: OSStatus = SecItemCopyMatching(query as CFDictionary, nil)
 		switch status {
 		case errSecSuccess:	// data exists
-			let attributesToUpdate: [String: Any] = [String(kSecValueData): encodedPassword]
+			// The protection travels with the value: an item written before this package asked
+			// for one is brought up to it here rather than being left as it was made.
+			var attributesToUpdate: [String: Any] = [String(kSecValueData): encodedPassword]
+			attributesToUpdate.merge(attributes) { _, new in new }
 
 			// Override status
 			// Update the item identified by query, overriding the previous value
@@ -48,6 +78,7 @@ public struct KeychainInterface: KeychainProtocol {
 			}
 		case errSecItemNotFound:
 			query[String(kSecValueData)] = encodedPassword
+			query.merge(attributes) { _, new in new }
 
 			// Override status
 			// Add the item identified by the query to keychain
@@ -60,17 +91,51 @@ public struct KeychainInterface: KeychainProtocol {
 		}
 	}
 
+	/// Brings every stored secret up to a protection.
+	///
+	/// For items written before the protection was asked for. One call: `SecItemUpdate` changes
+	/// every item its query matches, and the query here names the whole store.
+	///
+	/// - Parameter protection: What to bring them up to. A protection that asks for presence is
+	///   refused here — that one has to be chosen per secret, when it is written.
+	/// - Throws: If the status is not `errSecSuccess` or `errSecItemNotFound`.
+	public func upgradeProtection(to protection: KeychainProtection = .thisDeviceOnly) throws {
+		guard case .thisDeviceOnly = protection else {
+			throw KeychainError.accessControlFailed(
+				message: "Presence has to be chosen for one secret at a time"
+			)
+		}
+
+		let status: OSStatus = SecItemUpdate(
+			passwordQuery.query as CFDictionary,
+			try protection.attributes() as CFDictionary
+		)
+
+		guard status == errSecSuccess || status == errSecItemNotFound else {
+			throw error(from: status)
+		}
+	}
+
 	/// Read password from Keychain.
 	///
-	/// - Parameter key: Account name or key for stored data.
+	/// - Parameters:
+	///   - key: Account name or key for stored data.
+	///   - context: What the system asks presence with, for a secret that requires it.
 	/// - Throws: If the status is `errSecItemNotFound` or not `errSecSuccess` or the found Data is not a String.
 	/// - Returns: Founded password.
-	public func getValue(for key: String) throws -> String? {
+	public func getValue(for key: String, context: LAContext? = nil) throws -> String? {
 		var query: [String: Any] = passwordQuery.query
 		query[String(kSecMatchLimit)] = kSecMatchLimitOne
 		query[String(kSecReturnAttributes)] = kCFBooleanTrue
 		query[String(kSecReturnData)] = kCFBooleanTrue
 		query[String(kSecAttrAccount)] = key
+
+		// Only a secret that was written asking for presence prompts, and then the context is what
+		// carries the reason the person is shown and how long one answer counts for. Without one
+		// the system asks in its own words.
+		if let context {
+			query[String(kSecUseAuthenticationContext)] = context
+		}
 
 		// The status indicates if the operation succeeded or failed.
 		var queryResult: AnyObject?
